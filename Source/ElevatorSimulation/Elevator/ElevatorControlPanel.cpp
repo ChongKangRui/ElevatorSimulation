@@ -22,7 +22,7 @@ AElevatorControlPanel::AElevatorControlPanel()
 	BoxDetection->OnComponentEndOverlap.AddDynamic(this, &AElevatorControlPanel::OnBoxDetectionOverlapEnd);
 
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> elevatorControlPanelClassFinder(TEXT("/Game/UI/W_ElevatorControlPanel"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> elevatorControlPanelClassFinder(TEXT("/Game/UI/WBP_ElevatorControlPanel"));
 	if (elevatorControlPanelClassFinder.Succeeded())
 	{
 		m_ElevatorControlPanelWidgetClass = elevatorControlPanelClassFinder.Class;

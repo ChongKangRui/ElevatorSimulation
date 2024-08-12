@@ -69,7 +69,7 @@ void AElevator::StartMoving(int FloorNumber)
 	FVector elevatorLocation = ElevatorRoot->GetComponentLocation();
 	ElevatorRoot->SetWorldLocation(FVector(elevatorLocation.X, elevatorLocation.Y, zHeight));
 
-	if (FMath::IsNearlyEqual(pointLocation.Z, elevatorLocation.Z, 5.0f)) {
+	if (FMath::IsNearlyEqual(pointLocation.Z, elevatorLocation.Z, 1.0f)) {
 		StopMoving();
 	}
 }

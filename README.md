@@ -16,3 +16,5 @@
 - Most of the functionality was done in C++, only the goal mechanic and widget related were mostly done in the blueprint.
 - In terms of code formatting and organization, I organized it in descending order of public, protected and private sections. Each section will be having descending order from function to variable.
 - For naming convention, most of the naming convention should follow Unreal Guideline. The only difference is I will add a m_ prefix for private members. (exp: m_CharacterPawn)
+
+## Google Drive Folder(Demonstration video + Windows Shipped version): https://drive.google.com/drive/folders/1QQqv3x8xtD1RhHPV70DYKEtwcfpIU-G5?usp=sharing

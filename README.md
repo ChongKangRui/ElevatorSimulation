@@ -3,7 +3,7 @@
 ## Playtest
 - Multiplayer could only be tested in the editor as I didn't do the join server functionality
 - In the editor, use the default editor map L_TestLevel to test the elevator mechanic
--Otherwise, feel free to test the shipped version
+- Otherwise, feel free to test the shipped version
 
 ## Function that I have done
 - Elevator Mechanic, each floor will have its own control panel to call the elevator

@@ -14,8 +14,6 @@ class UInputAction;
 class AElevatorControlPanel;
 struct FInputActionValue;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
-
 UCLASS(config = Game)
 class AElevatorSimulationCharacter : public ACharacter
 {
@@ -23,6 +21,13 @@ class AElevatorSimulationCharacter : public ACharacter
 
 public:
 	AElevatorSimulationCharacter();
+
+	/*RPC pass through player character*/
+	UFUNCTION(BlueprintCallable, Server, Reliable)
+	void TriggerSelectFloor_Server(AElevator* elevator, int Destination);
+
+	UFUNCTION(Server, Reliable)
+	void TriggerCallElevator_Server();
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

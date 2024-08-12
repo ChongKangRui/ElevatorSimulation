@@ -31,8 +31,10 @@ public:
 	/*Defaults Interaction function from player*/
 	void InteractControlPanel(AElevatorSimulationCharacter* Interacter);
 
+	/*Will call in Character for RPC purpose*/
+	void CallElevator();
 public:
-	/*-1 will mean that this control panel is controlling the elevator directly. 
+	/*-1 will mean that this control panel should controlling the elevator directly. 
 	Otheriwse, this control panel should only calling elevator to their respective floor*/
 	UPROPERTY(EditInstanceOnly)
 	int FloorNumber = -1;
@@ -61,10 +63,9 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	void CallElevator();
 	void StopCallElevator();
 
-	void CreateElevatorControlWidget();
+	void CreateElevatorControlWidget(AElevatorSimulationCharacter* player);
 	void RemoveElevatorControlWidget();
 
 protected:
@@ -72,11 +73,13 @@ protected:
 	TObjectPtr<UWidgetComponent> PromptWidgetComponent;
 
 private:
+	FTimerHandle m_CallElevatorTimer;
+
 	TObjectPtr<AElevator> m_AssignedElevator;
 	TArray<TObjectPtr<AElevator>> m_ElevatorContainer;
 
-	FTimerHandle m_CallElevatorTimer;
-
 	TObjectPtr<UW_ElevatorControlPanel> m_CurrentElavatorWidget;
 	TSubclassOf<UW_ElevatorControlPanel> m_ElevatorControlPanelWidgetClass;
+
+	TWeakObjectPtr<AElevatorSimulationCharacter> m_CurrentInteracter;
 };

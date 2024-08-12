@@ -3,7 +3,8 @@
 
 #include "Elevator/W_ElevatorControlPanel.h"
 
-void UW_ElevatorControlPanel::SetControlPanel(AElevatorControlPanel* panel)
+void UW_ElevatorControlPanel::SetControlPanel(AElevatorControlPanel* panel, AElevatorSimulationCharacter* character)
 {
 	ControlPanel = panel;
+	PossessCharacter = character;
 }

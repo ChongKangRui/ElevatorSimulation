@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Elevator/ElevatorControlPanel.h"
+#include "Elevator/Elevator.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AElevatorSimulationCharacter
@@ -51,7 +52,6 @@ AElevatorSimulationCharacter::AElevatorSimulationCharacter()
 
 	Tags.Add("Player");
 }
-
 
 void AElevatorSimulationCharacter::BeginPlay()
 {
@@ -120,11 +120,12 @@ void AElevatorSimulationCharacter::Look(const FInputActionValue& Value)
 
 void AElevatorSimulationCharacter::InteractControlPanel()
 {
-	if (m_CurrentElevatorControlPanel.IsValid()){
+	if (m_CurrentElevatorControlPanel.IsValid()) {
+
 		m_CurrentElevatorControlPanel->InteractControlPanel(this);
 	}
 	else {
-	UE_LOG(LogTemp, Error, TEXT("Invalid Interact Control Panel"));
+		UE_LOG(LogTemp, Error, TEXT("Invalid Interact Control Panel"));
 	}
 }
 
@@ -156,3 +157,14 @@ void AElevatorSimulationCharacter::ToggleShowMouseCursor(bool show)
 	}
 
 }
+
+void AElevatorSimulationCharacter::TriggerSelectFloor_Server_Implementation(AElevator* elevator, int Destination)
+{
+	elevator->SetFloorDestination(Destination);
+}
+
+void AElevatorSimulationCharacter::TriggerCallElevator_Server_Implementation()
+{
+	m_CurrentElevatorControlPanel->CallElevator();
+}
+

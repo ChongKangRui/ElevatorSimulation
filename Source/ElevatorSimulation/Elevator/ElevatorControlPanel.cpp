@@ -9,18 +9,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "ElevatorSimulationCharacter.h"
 
-// Sets default values
 AElevatorControlPanel::AElevatorControlPanel()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
 
 	BoxDetection = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxDetectionComponent"));
 	BoxDetection->SetupAttachment(GetRootComponent());
 	BoxDetection->OnComponentBeginOverlap.AddDynamic(this, &AElevatorControlPanel::OnBoxDetectionOverlapBegin);
 	BoxDetection->OnComponentEndOverlap.AddDynamic(this, &AElevatorControlPanel::OnBoxDetectionOverlapEnd);
-
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> elevatorControlPanelClassFinder(TEXT("/Game/UI/WBP_ElevatorControlPanel"));
 	if (elevatorControlPanelClassFinder.Succeeded())
@@ -37,6 +33,7 @@ void AElevatorControlPanel::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/*Initialize every eleavator*/
 	if (FloorNumber != -1) {
 		TArray<AActor*> elevatorList;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElevator::StaticClass(), elevatorList);
@@ -66,20 +63,22 @@ void AElevatorControlPanel::SetAssignedElevator(AElevator* elevator)
 
 void AElevatorControlPanel::InteractControlPanel(AElevatorSimulationCharacter* Interacter)
 {
-	if (m_AssignedElevator) {
-		if (Interacter) {
+	if (Interacter) {
+		if (m_AssignedElevator) {
+			/*If control panel was directly controlling an elevator*/
 			if (m_CurrentElavatorWidget) {
 				RemoveElevatorControlWidget();
 				Interacter->ToggleShowMouseCursor(false);
 			}
 			else {
-				CreateElevatorControlWidget();
+				CreateElevatorControlWidget(Interacter);
 				Interacter->ToggleShowMouseCursor(true);
 			}
 		}
-	}
-	else {
-		CallElevator();
+		else {
+			/*Calling elevator to specific floor*/
+			Interacter->TriggerCallElevator_Server();
+		}
 	}
 }
 
@@ -87,6 +86,7 @@ void AElevatorControlPanel::CallElevator()
 {
 	FTimerManager& tm = GetWorld()->GetTimerManager();
 	if (tm.IsTimerActive(m_CallElevatorTimer)) {
+		UE_LOG(LogTemp, Warning, TEXT("Elevator Control Panel: Calling floor timer already activated"));
 		return;
 	}
 
@@ -99,8 +99,10 @@ void AElevatorControlPanel::CallElevator()
 		return elevator->GetDestinationFloor() == FloorNumber;
 		});
 
-	if (hasElevatorOnFloor)
+	if (hasElevatorOnFloor) {
+		UE_LOG(LogTemp, Warning, TEXT("Elevator Control Panel: Already had elevator on current floor"));
 		return;
+	}
 
 	FTimerDelegate tempDelegate;
 	tempDelegate.BindWeakLambda(this, [&]()
@@ -108,13 +110,17 @@ void AElevatorControlPanel::CallElevator()
 			TObjectPtr<AElevator>* elevator = m_ElevatorContainer.FindByPredicate([this](const TObjectPtr<AElevator>& elevator) {
 				return !elevator->IsMoving();
 				});
+
 			UE_LOG(LogTemp, Warning, TEXT("Elevator Control Panel: finding elevator to call"));
 			if (elevator && (*elevator)) {
+
 				(*elevator)->SetFloorDestination(FloorNumber);
 				StopCallElevator();
+
 			}
 		});
 	tm.SetTimer(m_CallElevatorTimer, tempDelegate, 1.0f, true);
+
 }
 
 void AElevatorControlPanel::StopCallElevator()
@@ -123,11 +129,11 @@ void AElevatorControlPanel::StopCallElevator()
 	m_CallElevatorTimer.Invalidate();
 }
 
-void AElevatorControlPanel::CreateElevatorControlWidget()
+void AElevatorControlPanel::CreateElevatorControlWidget(AElevatorSimulationCharacter* player)
 {
 	if (!m_CurrentElavatorWidget) {
 		m_CurrentElavatorWidget = CreateWidget<UW_ElevatorControlPanel>(GetWorld(), m_ElevatorControlPanelWidgetClass);
-		m_CurrentElavatorWidget->SetControlPanel(this);
+		m_CurrentElavatorWidget->SetControlPanel(this, player);
 		m_CurrentElavatorWidget->AddToViewport();
 	}
 }
@@ -144,6 +150,8 @@ void AElevatorControlPanel::OnBoxDetectionOverlapBegin(UPrimitiveComponent* Over
 {
 	if (OtherActor->ActorHasTag("Player")) {
 		if (AElevatorSimulationCharacter* playercharacter = Cast<AElevatorSimulationCharacter>(OtherActor)) {
+			/*Set the reference and set visibility of prompt*/
+			m_CurrentInteracter = playercharacter;
 			PromptWidgetComponent->SetVisibility(true);
 			playercharacter->SetElavatorControlPanel(this);
 		}
@@ -153,15 +161,16 @@ void AElevatorControlPanel::OnBoxDetectionOverlapBegin(UPrimitiveComponent* Over
 void AElevatorControlPanel::OnBoxDetectionOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (OtherActor->ActorHasTag("Player")) {
-		if (AElevatorSimulationCharacter* playercharacter = Cast<AElevatorSimulationCharacter>(OtherActor)) {
+		if (m_CurrentInteracter.IsValid()) {
 
 			if (m_AssignedElevator) {
 				RemoveElevatorControlWidget();
-				playercharacter->ToggleShowMouseCursor(false);
+				m_CurrentInteracter->ToggleShowMouseCursor(false);
 			}
 
 			PromptWidgetComponent->SetVisibility(false);
-			playercharacter->ClearElevatorControlPanel();
+			m_CurrentInteracter->ClearElevatorControlPanel();
+			m_CurrentInteracter.Reset();
 		}
 	}
 }

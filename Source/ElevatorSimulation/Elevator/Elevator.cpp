@@ -4,10 +4,8 @@
 #include "Elevator.h"
 #include "Components/SplineComponent.h"
 
-// Sets default values
 AElevator::AElevator()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	DefaultsSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultsRoot"));
@@ -23,16 +21,18 @@ AElevator::AElevator()
 		ElevatorSpline->SetSplinePointType(i,ESplinePointType::Constant);
 	}
 
-	//bReplicates = true;
-	//SetReplicateMovement(true);
+	bReplicates = true;
+	SetReplicateMovement(true);
+	
 }
 
 void AElevator::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	FVector pointLocation = ElevatorSpline->GetWorldLocationAtSplinePoint(DefaultsStartFloor);
 	ElevatorRoot->SetWorldLocation(pointLocation);
+	m_CurrentFloor = DefaultsStartFloor;
 }
 
 void AElevator::SetFloorDestination(const int floorToReach)

@@ -20,7 +20,6 @@ public:
 	void SetFloorDestination(const int floorToReach);
 
 	int GetDestinationFloor() const;
-
 	bool IsMoving() const;
 
 public:
